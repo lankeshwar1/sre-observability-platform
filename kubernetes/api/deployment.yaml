@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sre-api
+  labels:
+    app: sre-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sre-api
+  template:
+    metadata:
+      labels:
+        app: sre-api
+    spec:
+      containers:
+        - name: api
+          image: enterprise-sre-api:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: RABBITMQ_URL
+              value: amqp://rabbitmq:5672
+            - name: RABBITMQ_QUEUE
+              value: sre-jobs
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sre-api
+spec:
+  type: NodePort
+  selector:
+    app: sre-api
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30001
