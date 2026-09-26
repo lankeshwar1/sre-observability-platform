@@ -1,0 +1,39 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: sre-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./app/api
+    image: enterprise-sre-api:1.0.0
+    container_name: sre-api
+    ports:
+      - "3001:3000"
+    environment:
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_QUEUE: sre-jobs
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./app/worker
+    image: enterprise-sre-worker:1.0.0
+    container_name: sre-worker
+    environment:
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_QUEUE: sre-jobs
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
