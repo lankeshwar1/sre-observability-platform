@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install API Dependencies') {
+            steps {
+                dir('app/api') {
+                    sh 'npm ci --omit=dev'
+                }
+            }
+        }
+
+        stage('Install Worker Dependencies') {
+            steps {
+                dir('app/worker') {
+                    sh 'npm ci --omit=dev'
+                }
+            }
+        }
+
+        stage('Build API Image') {
+            steps {
+                sh 'docker build -t enterprise-sre-api:${BUILD_NUMBER} ./app/api'
+            }
+        }
+
+        stage('Build Worker Image') {
+            steps {
+                sh 'docker build -t enterprise-sre-worker:${BUILD_NUMBER} ./app/worker'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI pipeline completed successfully.'
+        }
+
+        failure {
+            echo 'CI pipeline failed. Check the stage logs.'
+        }
+    }
+}
