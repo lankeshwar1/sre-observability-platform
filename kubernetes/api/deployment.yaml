@@ -14,6 +14,7 @@ spec:
       labels:
         app: sre-api
     spec:
+      serviceAccountName: sre-app
       containers:
         - name: api
           image: enterprise-sre-api:1.0.0

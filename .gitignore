@@ -3,6 +3,8 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+api-5.tar
+keys.md
 
 # Environment files
 .env
