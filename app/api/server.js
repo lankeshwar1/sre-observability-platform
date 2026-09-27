@@ -1,4 +1,6 @@
 const express = require("express");
+const client = require("prom-client");
+
 const {
   connectRabbitMQ,
   getChannel,
@@ -7,8 +9,13 @@ const {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+client.collectDefaultMetrics();
 app.use(express.json());
+
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.end(await client.register.metrics());
+});
 
 app.get("/health", (req, res) => {
   res.json({
