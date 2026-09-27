@@ -40,6 +40,15 @@ pipeline {
                 sh 'docker build -t enterprise-sre-worker:${BUILD_NUMBER} ./app/worker'
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl set image deployment/sre-api api=enterprise-sre-api:${BUILD_NUMBER}'
+                sh 'kubectl set image deployment/sre-worker worker=enterprise-sre-worker:${BUILD_NUMBER}'
+                sh 'kubectl rollout status deployment/sre-api'
+                sh 'kubectl rollout status deployment/sre-worker'
+            }
+        }
     }
 
     post {
