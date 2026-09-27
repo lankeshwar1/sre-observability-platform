@@ -43,13 +43,15 @@ pipeline {
 
         stage('Load Images into Minikube') {
             steps {
-                docker save enterprise-sre-api:${BUILD_NUMBER} -o /tmp/api-${BUILD_NUMBER}.tar
-                docker save enterprise-sre-worker:${BUILD_NUMBER} -o /tmp/worker-${BUILD_NUMBER}.tar
+                sh '''
+                    docker save enterprise-sre-api:$BUILD_NUMBER -o /tmp/api-$BUILD_NUMBER.tar
+                    docker save enterprise-sre-worker:$BUILD_NUMBER -o /tmp/worker-$BUILD_NUMBER.tar
 
-                cat /tmp/api-${BUILD_NUMBER}.tar | docker exec -i minikube ctr -n k8s.io images import -
-                cat /tmp/worker-${BUILD_NUMBER}.tar | docker exec -i minikube ctr -n k8s.io images import -
+                    cat /tmp/api-$BUILD_NUMBER.tar | docker exec -i minikube ctr -n k8s.io images import -
+                    cat /tmp/worker-$BUILD_NUMBER.tar | docker exec -i minikube ctr -n k8s.io images import -
 
-                rm -f /tmp/api-${BUILD_NUMBER}.tar /tmp/worker-${BUILD_NUMBER}.tar
+                    rm -f /tmp/api-$BUILD_NUMBER.tar /tmp/worker-$BUILD_NUMBER.tar
+                '''
             }
         }
 
